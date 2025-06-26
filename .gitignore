@@ -40,3 +40,4 @@ lerna-debug.log*
 /ormconfig.json
 .codegpt
 node_modules
+/node_moduless
