@@ -24,6 +24,8 @@ import { PostsModule } from './posts/posts.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        migrations: ['src/migrations/*.ts'],
+        migrationsTableName: 'migrations',
         // TODO: remove this in production
         // synchronize: true,
       }),
