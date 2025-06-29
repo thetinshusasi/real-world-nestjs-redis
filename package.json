@@ -26,6 +26,8 @@
     "migration:run": "npm run typeorm -- migration:run -d typeorm.config.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d typeorm.config.ts",
     "migration:show": "npm run typeorm -- migration:show -d typeorm.config.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/seeding/run-seeder.ts",
+    "seed:run": "ts-node -r tsconfig-paths/register src/seeding/run-seeder.ts",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
@@ -40,6 +42,7 @@
     "docker:clean:prod": "docker-compose -f docker-compose.prod.yml down -v && docker system prune -f"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^11.0.1",
@@ -57,7 +60,8 @@
     "pg": "^8.16.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.25"
+    "typeorm": "^0.3.25",
+    "typeorm-extension": "^3.7.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

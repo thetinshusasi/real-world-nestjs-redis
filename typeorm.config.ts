@@ -10,13 +10,6 @@ ConfigModule.forRoot({
 
 const configService = new ConfigService();
 
-console.log(configService.get('DB_PASSWORD'), 'DB_PASSWORD');
-console.log(configService.get('DB_NAME'), 'DB_NAME');
-console.log(configService.get('DB_USERNAME'), 'DB_USERNAME');
-console.log(configService.get('DB_HOST'), 'DB_HOST');
-console.log(configService.get('DB_PORT'), 'DB_PORT');
-
-
 export default new DataSource({
     type: 'postgres',
     host: configService.get('DB_HOST'),
