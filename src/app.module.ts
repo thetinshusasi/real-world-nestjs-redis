@@ -6,9 +6,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CommentsModule } from "./comments/comments.module";
 import { PostsModule } from "./posts/posts.module";
-
 import * as path from 'path';
 import { DataSource, DataSourceOptions } from "typeorm";
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -41,6 +41,7 @@ import { DataSource, DataSourceOptions } from "typeorm";
     }),
     SharedModule,
     CommentsModule,
+    CacheModule,
     PostsModule,
   ],
   controllers: [AppController],
