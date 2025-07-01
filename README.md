@@ -64,6 +64,7 @@ DB_PASSWORD=postgres123
 REDIS_HOST=localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=12345
+REDIS_TTL=60000
 
 # Production Environment Variables (optional)
 POSTGRES_PASSWORD=your_secure_password
@@ -74,19 +75,20 @@ PGADMIN_PASSWORD=your_secure_pgadmin_password
 
 ### Environment Variable Descriptions
 
-| Variable         | Description                   | Default                 | Required |
-| ---------------- | ----------------------------- | ----------------------- | -------- |
-| `NODE_ENV`       | Application environment       | `development`           | No       |
-| `PORT`           | Application port              | `3000`                  | No       |
-| `API_URL`        | Base API URL for HTTP service | `http://localhost:3000` | No       |
-| `DB_HOST`        | PostgreSQL host               | `localhost`             | Yes      |
-| `DB_PORT`        | PostgreSQL port               | `5432`                  | Yes      |
-| `DB_NAME`        | PostgreSQL database name      | `nestjs_db`             | Yes      |
-| `DB_USERNAME`    | PostgreSQL username           | `postgres`              | Yes      |
-| `DB_PASSWORD`    | PostgreSQL password           | `postgres123`           | Yes      |
-| `REDIS_HOST`     | Redis host                    | `localhost`             | Yes      |
-| `REDIS_PORT`     | Redis port                    | `6379`                  | Yes      |
-| `REDIS_PASSWORD` | Redis password                | `12345`                 | Yes      |
+| Variable         | Description                    | Default                 | Required |
+| ---------------- | ------------------------------ | ----------------------- | -------- |
+| `NODE_ENV`       | Application environment        | `development`           | No       |
+| `PORT`           | Application port               | `3000`                  | No       |
+| `API_URL`        | Base API URL for HTTP service  | `http://localhost:3000` | No       |
+| `DB_HOST`        | PostgreSQL host                | `localhost`             | Yes      |
+| `DB_PORT`        | PostgreSQL port                | `5432`                  | Yes      |
+| `DB_NAME`        | PostgreSQL database name       | `nestjs_db`             | Yes      |
+| `DB_USERNAME`    | PostgreSQL username            | `postgres`              | Yes      |
+| `DB_PASSWORD`    | PostgreSQL password            | `postgres123`           | Yes      |
+| `REDIS_HOST`     | Redis host                     | `localhost`             | Yes      |
+| `REDIS_PORT`     | Redis port                     | `6379`                  | Yes      |
+| `REDIS_PASSWORD` | Redis password                 | `12345`                 | Yes      |
+| `REDIS_TTL`      | Redis cache TTL (milliseconds) | `60000`                 | No       |
 
 ## 🐳 Docker Setup
 
@@ -155,13 +157,13 @@ pnpm docker:prod:up
 
 #### Redis
 
-- **Host**: `localhost`
+- **Host**: `localhost` - For some reason localhost works but not IP address . Todo: Identify the cause for it
 - **Port**: `6379`
 - **Password**: `12345`
 
 #### Management Tools
 
-- **RedisInsight**: `http://localhost:5540` - Redis GUI management
+- **RedisInsight**: `http://localhost:5540` - Redis GUI management - Use IP address from docker or service name from docker compose
 - **pgAdmin**: `http://localhost:5050` - PostgreSQL administration
   - Email: `admin@admin.com`
   - Password: `admin`
@@ -289,6 +291,14 @@ This project is licensed under the UNLICENSED license.
 2. **Database connection**: Verify PostgreSQL is running and credentials are correct
 3. **Redis connection**: Check if Redis is running and password is correct
 4. **Docker issues**: Ensure Docker and Docker Compose are properly installed
+
+### Redis Configuration Notes
+
+- **Redis Authentication**: This setup uses password-only authentication (no username required)
+- **Connection URL Format**: `redis://:<password>@<host>:<port>`
+- **Default Password**: `12345` (change in production)
+- **TTL**: Default cache TTL is set to 4 hours in the cache module
+- **RedisInsight**: Available at `http://localhost:5540` for Redis management and debugging
 
 ### Getting Help
 
