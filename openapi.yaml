@@ -1,0 +1,627 @@
+openapi: 3.1.0
+info:
+  title: NestJS Redis Real World API
+  description: A real-world NestJS application with Redis caching for posts and comments
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.example.com
+    description: Production server
+
+paths:
+  /:
+    get:
+      summary: Get hello message
+      description: Returns a simple hello message from the application
+      operationId: getHello
+      tags:
+        - App
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Hello World!"
+
+  /posts:
+    get:
+      summary: Get all posts
+      description: Retrieve all posts with optional caching
+      operationId: findAllPosts
+      tags:
+        - Posts
+      responses:
+        "200":
+          description: List of posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  title: "Sample Post Title"
+                  content: "This is the content of the sample post"
+                  createdAt: 1703123456789
+                  updatedAt: 1703123456789
+                  comments: []
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create a new post
+      description: Create a new post and clear cache
+      operationId: createPost
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostDto"
+            example:
+              title: "New Post Title"
+              content: "This is the content of the new post"
+      responses:
+        "201":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                title: "New Post Title"
+                content: "This is the content of the new post"
+                createdAt: 1703123456789
+                updatedAt: 1703123456789
+                comments: []
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/test:
+    get:
+      summary: Test cache endpoint
+      description: Retrieve cached posts data for testing purposes
+      operationId: testCache
+      tags:
+        - Posts
+      responses:
+        "200":
+          description: Cached data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /posts/{id}:
+    get:
+      summary: Get a specific post
+      description: Retrieve a post by its ID
+      operationId: findOnePost
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The post ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                title: "Sample Post Title"
+                content: "This is the content of the sample post"
+                createdAt: 1703123456789
+                updatedAt: 1703123456789
+                comments: []
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    patch:
+      summary: Update a post
+      description: Update an existing post and clear cache
+      operationId: updatePost
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The post ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePostDto"
+            example:
+              title: "Updated Post Title"
+              content: "This is the updated content of the post"
+      responses:
+        "200":
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174000"
+                title: "Updated Post Title"
+                content: "This is the updated content of the post"
+                createdAt: 1703123456789
+                updatedAt: 1703123456790
+                comments: []
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete a post
+      description: Delete a post and clear cache
+      operationId: removePost
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The post ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Post deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Post deleted successfully"
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /comments:
+    get:
+      summary: Get all comments
+      description: Retrieve all comments
+      operationId: findAllComments
+      tags:
+        - Comments
+      responses:
+        "200":
+          description: List of comments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174001"
+                  content: "This is a sample comment"
+                  createdAt: 1703123456789
+                  updatedAt: 1703123456789
+                  postId: "123e4567-e89b-12d3-a456-426614174000"
+                  post: null
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Create a new comment
+      description: Create a new comment
+      operationId: createComment
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommentDto"
+            example:
+              content: "This is a new comment"
+              postId: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "201":
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174001"
+                content: "This is a new comment"
+                createdAt: 1703123456789
+                updatedAt: 1703123456789
+                postId: "123e4567-e89b-12d3-a456-426614174000"
+                post: null
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /comments/{id}:
+    get:
+      summary: Get a specific comment
+      description: Retrieve a comment by its ID
+      operationId: findOneComment
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The comment ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        "200":
+          description: Comment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174001"
+                content: "This is a sample comment"
+                createdAt: 1703123456789
+                updatedAt: 1703123456789
+                postId: "123e4567-e89b-12d3-a456-426614174000"
+                post: null
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    patch:
+      summary: Update a comment
+      description: Update an existing comment
+      operationId: updateComment
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The comment ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCommentDto"
+            example:
+              content: "This is the updated comment content"
+      responses:
+        "200":
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+              example:
+                id: "123e4567-e89b-12d3-a456-426614174001"
+                content: "This is the updated comment content"
+                createdAt: 1703123456789
+                updatedAt: 1703123456790
+                postId: "123e4567-e89b-12d3-a456-426614174000"
+                post: null
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete a comment
+      description: Delete a comment
+      operationId: removeComment
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The comment ID
+          schema:
+            type: string
+            format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        "200":
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Comment deleted successfully"
+        "404":
+          description: Comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the post
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        title:
+          type: string
+          description: Title of the post
+          example: "Sample Post Title"
+        content:
+          type: string
+          description: Content of the post
+          example: "This is the content of the sample post"
+        createdAt:
+          type: integer
+          format: int64
+          description: Timestamp when the post was created
+          example: 1703123456789
+        updatedAt:
+          type: integer
+          format: int64
+          description: Timestamp when the post was last updated
+          example: 1703123456789
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+          description: Array of comments associated with this post
+      required:
+        - id
+        - title
+        - content
+        - createdAt
+        - updatedAt
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the comment
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        content:
+          type: string
+          description: Content of the comment
+          example: "This is a sample comment"
+        createdAt:
+          type: integer
+          format: int64
+          description: Timestamp when the comment was created
+          example: 1703123456789
+        updatedAt:
+          type: integer
+          format: int64
+          description: Timestamp when the comment was last updated
+          example: 1703123456789
+        postId:
+          type: string
+          format: uuid
+          description: ID of the post this comment belongs to
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        post:
+          $ref: "#/components/schemas/Post"
+          nullable: true
+          description: The post this comment belongs to (populated when requested)
+      required:
+        - id
+        - content
+        - createdAt
+        - updatedAt
+        - postId
+
+    CreatePostDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the post
+          example: "New Post Title"
+        content:
+          type: string
+          description: Content of the post
+          example: "This is the content of the new post"
+      required:
+        - title
+        - content
+
+    UpdatePostDto:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the post
+          example: "Updated Post Title"
+        content:
+          type: string
+          description: Content of the post
+          example: "This is the updated content of the post"
+      additionalProperties: false
+
+    CreateCommentDto:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Content of the comment
+          example: "This is a new comment"
+        postId:
+          type: string
+          format: uuid
+          description: ID of the post this comment belongs to
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      required:
+        - content
+        - postId
+
+    UpdateCommentDto:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Content of the comment
+          example: "This is the updated comment content"
+      additionalProperties: false
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          description: HTTP status code
+          example: 400
+        message:
+          type: string
+          description: Error message
+          example: "Bad Request"
+        error:
+          type: string
+          description: Error type
+          example: "Bad Request"
+      required:
+        - statusCode
+        - message
+
+tags:
+  - name: App
+    description: Application root endpoints
+  - name: Posts
+    description: Post management operations
+  - name: Comments
+    description: Comment management operations
+
+externalDocs:
+  description: Find more info about this API
+  url: https://docs.example.com
